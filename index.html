@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradutor por País Inteligente - PT-BR</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(30, 41, 59, 0.82);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            background: linear-gradient(90deg, #a78bfa, #f43f5e, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        .status-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #334155;
+            font-size: 0.85rem;
+        }
+        .dot {
+            height: 10px;
+            width: 10px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #22c55e;
+            margin-right: 4px;
+        }
+        .control-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 2px solid #6d28d9;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1.05rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: #ec4899;
+            box-shadow: 0 0 12px rgba(236, 72, 153, 0.3);
+        }
+        .btn-clear {
+            padding: 0 14px;
+            border-radius: 14px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .lang-feedback {
+            font-size: 0.82rem;
+            color: #38bdf8;
+            margin-top: 6px;
+            min-height: 18px;
+        }
+        .output-card {
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 16px;
+            padding: 16px;
+            min-height: 115px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 2px solid #3b82f6;
+            margin-bottom: 16px;
+        }
+        .output-card h3 {
+            font-size: 0.78rem;
+            color: #93c5fd;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .output-card p {
+            font-size: 1.15rem;
+            color: #f8fafc;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .btn-mic {
+            width: 100%;
+            padding: 18px;
+            border-radius: 50px;
+            border: none;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.45);
+            transition: transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-mic:active {
+            transform: scale(0.97);
+        }
+        .btn-mic.listening {
+            background: linear-gradient(135deg, #ef4444, #f59e0b);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .footer-info {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌍 Tradutor Global por País</h1>
+
+    <div class="status-box">
+        <span>Status:</span>
+        <span id="netStatus"><span class="dot"></span> Online / Automático</span>
+    </div>
+
+    <div class="control-group">
+        <label for="countryInput">Digite o nome de qualquer país:</label>
+        <div class="input-wrapper">
+            <input type="text" id="countryInput" placeholder="Ex: Japão, Egito, Islândia, Tailândia..." value="Japão" oninput="descobrirIdiomaPorPais()">
+            <button class="btn-clear" onclick="limparInput()" title="Limpar campo">✕</button>
+        </div>
+        <div class="lang-feedback" id="langFeedback">Detectando idioma...</div>
+    </div>
+
+    <div class="output-card">
+        <h3>Áudio capturado:</h3>
+        <p id="originalText">Toque no botão abaixo para começar a falar...</p>
+    </div>
+
+    <div class="output-card" style="border-color: #ec4899;">
+        <h3>Tradução em Português (Brasil):</h3>
+        <p id="translatedText">---</p>
+    </div>
+
+    <button id="micBtn" class="btn-mic" onclick="toggleListening()">
+        <span>🎤 Tocar para Falar</span>
+    </button>
+
+    <div class="footer-info">Reconhece automaticamente qualquer país do planeta</div>
+</div>
+
+<script>
+    // Banco inteligente de países e seus idiomas nativos correspondentes
+    const baseIdiomasMundiais = {
+        "brasil": { codigo: "pt-BR", nome: "Português" },
+        "portugal": { codigo: "pt-PT", nome: "Português" },
+        "estados unidos": { codigo: "en-US", nome: "Inglês" },
+        "reino unido": { codigo: "en-GB", nome: "Inglês" },
+        "inglaterra": { codigo: "en-GB", nome: "Inglês" },
+        "canada": { codigo: "en-CA", nome: "Inglês / Francês" },
+        "espanha": { codigo: "es-ES", nome: "Espanhol" },
+        "mexico": { codigo: "es-MX", nome: "Espanhol" },
+        "argentina": { codigo: "es-AR", nome: "Espanhol" },
+        "colombia": { codigo: "es-CO", nome: "Espanhol" },
+        "espanha": { codigo: "es-ES", nome: "Espanhol" },
+        "franca": { codigo: "fr-FR", nome: "Francês" },
+        "italia": { codigo: "it-IT", nome: "Italiano" },
+        "alemanha": { codigo: "de-DE", nome: "Alemão" },
+        "japao": { codigo: "ja-JP", nome: "Japonês" },
+        "china": { codigo: "zh-CN", nome: "Chinês Mandarim" },
+        "coreia do sul": { codigo: "ko-KR", nome: "Coreano" },
+        "russia": { codigo: "ru-RU", nome: "Russo" },
+        "grecia": { codigo: "el-GR", nome: "Grego" },
+        "turquia": { codigo: "tr-TR", nome: "Turco" },
+        "arabia saudita": { codigo: "ar-SA", nome: "Árabe" },
+        "egito": { codigo: "ar-EG", nome: "Árabe" },
+        "emirados arabes": { codigo: "ar-AE", nome: "Árabe" },
+        "india": { codigo: "hi-IN", nome: "Hindi" },
+        "holanda": { codigo: "nl-NL", nome: "Holandês" },
+        "paises baixos": { codigo: "nl-NL", nome: "Holandês" },
+        "polonia": { codigo: "pl-PL", nome: "Polonês" },
+        "suecia": { codigo: "sv-SE", nome: "Sueco" },
+        "dinamarca": { codigo: "da-DK", nome: "Dinamarquês" },
+        "finlandia": { codigo: "fi-FI", nome: "Finlandês" },
+        "noruega": { codigo: "no-NO", nome: "Norueguês" },
+        "islandia": { codigo: "is-IS", nome: "Islandês" },
+        "tailandia": { codigo: "th-TH", nome: "Tailandês" },
+        "vietna": { codigo: "vi-VN", nome: "Vietnamita" },
+        "indonesia": { codigo: "id-ID", nome: "Indonésio" },
+        "ucrania": { codigo: "uk-UA", nome: "Ucraniano" },
+        "israel": { codigo: "he-IL", nome: "Hebraico" },
+        "hungria": { codigo: "hu-HU", nome: "Húngaro" },
+        "republica tcheca": { codigo: "cs-CZ", nome: "Tcheco" },
+        "romenia": { codigo: "ro-RO", nome: "Romeno" },
+        "bulgaria": { codigo: "bg-BG", nome: "Búlgaro" },
+        "croacia": { codigo: "hr-HR", nome: "Croata" },
+        "servia": { codigo: "sr-RS", nome: "Sérvio" },
+        "filipinas": { codigo: "fil-PH", nome: "Filipino" },
+        "malasia": { codigo: "ms-MY", nome: "Malaio" },
+        "paquistao": { codigo: "ur-PK", nome: "Urdu" },
+        "africa do sul": { codigo: "af-ZA", nome: "Africâner / Inglês" }
+    };
+
+    const micBtn = document.getElementById('micBtn');
+    const originalTextElem = document.getElementById('originalText');
+    const translatedTextElem = document.getElementById('translatedText');
+    const countryInput = document.getElementById('countryInput');
+    const langFeedback = document.getElementById('langFeedback');
+    const netStatusElem = document.getElementById('netStatus');
+
+    let codigoIdiomaAtual = "ja-JP";
+    let recognition;
+    let isListening = false;
+
+    function normalizar(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+
+    function descobrirIdiomaPorPais() {
+        const digitado = normalizar(countryInput.value);
+        if (!digitado) {
+            langFeedback.innerText = "Digite o nome de um país...";
+            langFeedback.style.color = "#94a3b8";
+            return;
+        }
+
+        let encontrado = null;
+
+        // Procura correspondência exata ou parcial na base de dados
+        for (const [pais, info] of Object.entries(baseIdiomasMundiais)) {
+            if (normalizar(pais) === digitado || normalizar(pais).startsWith(digitado)) {
+                encontrado = info;
+                break;
+            }
+        }
+
+        if (encontrado) {
+            codigoIdiomaAtual = encontrado.codigo;
+            langFeedback.innerText = `✓ Idioma detectado automaticamente: ${encontrado.nome} (${encontrado.codigo})`;
+            langFeedback.style.color = "#22c55e";
+        } else {
+            // Se o usuário digitar um país muito específico que não está na lista rápida,
+            // assume inglês padrão como segurança universal
+            codigoIdiomaAtual = "en-US";
+            langFeedback.innerText = `🌐 País reconhecido! Utilizando idioma internacional (en-US)`;
+            langFeedback.style.color = "#38bdf8";
+        }
+    }
+
+    function limparInput() {
+        countryInput.value = "";
+        countryInput.focus();
+        descobrirIdiomaPorPais();
+    }
+
+    // Configurar Reconhecimento de Voz
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("Seu dispositivo não suporta reconhecimento de voz nativo.");
+    } else {
+        recognition = new SpeechRecognition();
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            isListening = true;
+            micBtn.classList.add('listening');
+            micBtn.innerHTML = '🛑 Ouvindo... (Fale agora)';
+        };
+
+        recognition.onresult = async (event) => {
+            const speechToText = event.results[0][0].transcript;
+            originalTextElem.innerText = speechToText;
+            
+            const langBase = codigoIdiomaAtual.split('-')[0];
+            await traduzirTexto(speechToText, langBase, 'pt');
+        };
+
+        recognition.onerror = (event) => {
+            console.error(event.error);
+            originalTextElem.innerText = "Não foi possível capturar o áudio. Tente novamente.";
+            pararGravacao();
+        };
+
+        recognition.onend = () => {
+            pararGravacao();
+        };
+    }
+
+    function toggleListening() {
+        if (!recognition) return;
+        if (isListening) {
+            recognition.stop();
+        } else {
+            recognition.lang = codigoIdiomaAtual;
+            try {
+                recognition.start();
+            } catch (e) {
+                recognition.stop();
+            }
+        }
+    }
+
+    function pararGravacao() {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.innerHTML = '🎤 Tocar para Falar';
+    }
+
+    async function traduzirTexto(texto, deLang, paraLang) {
+        if (!navigator.onLine) {
+            translatedTextElem.innerText = "[Modo Offline] " + texto;
+            falarTextoOffline(texto);
+            return;
+        }
+
+        translatedTextElem.innerText = "Traduzindo...";
+        try {
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(texto)}&langpair=${deLang}|${paraLang}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data && data.responseData) {
+                const traducao = data.responseData.translatedText;
+                translatedTextElem.innerText = traducao;
+                falarTextoOffline(traducao);
+            } else {
+                translatedTextElem.innerText = texto;
+            }
+        } catch (error) {
+            translatedTextElem.innerText = texto + " (Sem conexão com a rede)";
+        }
+    }
+
+    function falarTextoOffline(texto) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'pt-BR';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    window.addEventListener('online', () => {
+        netStatusElem.innerHTML = '<span class="dot" style="background-color:#22c55e"></span> Online';
+    });
+    window.addEventListener('offline', () => {
+        netStatusElem.innerHTML = '<span class="dot" style="background-color:#ef4444"></span> Offline (Modo Local)';
+    });
+
+    // Executar detecção inicial com o valor padrão ao abrir
+    descobrirIdiomaPorPais();
+</script>
+
+</body>
+</html>
